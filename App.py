@@ -41,6 +41,10 @@ def create_dicom_from_image(output_img):
         st.error(f"Error creating DICOM: {e}")
         return None
 
+import streamlit as st
+import base64
+from PIL import Image
+
 # Initialize session state
 if 'page' not in st.session_state:
     st.session_state.page = 'home'  # Default to the home page
@@ -110,12 +114,17 @@ elif st.session_state.page == 'signup':
                 st.session_state.page = 'login'  # Navigate to the login page
         else:
             st.error("Please ensure all fields are filled correctly.")
-
-
-# Upload page
+    
+# Upload page (after successful login)
 elif st.session_state.page == 'upload':
     st.subheader("Upload an X-ray Image")
     file = st.file_uploader("Upload an X-ray image of the spine (JPG, PNG)", type=["jpg", "png"])
+
+    # Handle the image prediction process (your logic here)
+    if file is not None:
+        # Add image processing logic
+        st.image(file, caption="Uploaded Image", use_container_width=True)
+
 
     if file is not None:
         try:
