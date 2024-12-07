@@ -1,10 +1,7 @@
-streamlit
-torch
-pil
-io
+Flask
+Flask-Cors
+opencv-python-headless
+Pillow
 numpy
-math
-cv2
+onnxruntime
 yolov5
-base64
-pydicom
