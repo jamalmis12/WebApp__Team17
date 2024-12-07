@@ -85,14 +85,11 @@ elif st.session_state.page == 'login':
             st.session_state.page = 'upload'  # Navigate to the upload page
         else:
             st.error("Invalid credentials. Please try again.")
+    
+    st.markdown("<br>")
 
-    # Add the "Sign Up" link if the user does not have an account
-    st.markdown(
-        "<p style='text-align:center;'>Don't have an account? <a href='#' onclick='document.location.reload(); return false;'>Sign Up</a></p>", 
-        unsafe_allow_html=True
-    )
-
-    if st.session_state.get("sign_up_clicked", False):
+    # Button to navigate to the Sign-Up page
+    if st.button("Don't have an account? Sign Up", help="Redirect to Sign Up page"):
         st.session_state.page = 'signup'  # Navigate to the sign-up page
 
 # Sign-up page
