@@ -95,7 +95,7 @@ elif st.session_state.page == 'login':
     )
 
     if st.session_state.get("sign_up_clicked", False):
-        st.session_state.page = 'signup'  # Navigate to the sign-up page
+        st.session_state.page = 'Sign Up'  # Navigate to the sign-up page
 
 # Sign-up page
 elif st.session_state.page == 'signup':
