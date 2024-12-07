@@ -85,14 +85,12 @@ elif st.session_state.page == 'login':
             st.session_state.page = 'upload'  # Navigate to the upload page
         else:
             st.error("Invalid credentials. Please try again.")
-    
-    st.markdown("<br>", unsafe_allow_html=True)
 
     # Center the existing "Don't have an account? Sign Up" button using columns
     col1, col2, col3 = st.columns([1, 1, 1])  # Create 3 columns for centering
 
     with col2:  # Place the button in the center column
-        if st.button("Don't have an account? Sign Up", help="Redirect to Sign Up page"):
+        if st.button("Don't have an account? SignUp", help="Redirect to Sign Up page"):
             st.session_state.page = 'signup'  # Navigate to the sign-up page
 
 # Sign-up page
