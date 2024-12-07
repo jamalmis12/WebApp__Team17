@@ -57,32 +57,24 @@ def create_dicom_from_image(output_img):
 
 # Initialize session state
 if 'page' not in st.session_state:
-    st.session_state.page = 'home'  # Default to the home page
+    st.session_state.page = 'login'  # Start on the login page by default
 if 'users' not in st.session_state:
     st.session_state.users = {}  # Store users' credentials
 
-# Home page
-if st.session_state.page == 'home':
-    def image_to_base64(image_path):
-        with open(image_path, "rb") as img_file:
-            return base64.b64encode(img_file.read()).decode("utf-8")
+# Login page
+if st.session_state.page == 'login':
+    st.subheader("Login")
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
 
-    image_path = "./static/verr.png"
-    encoded_image = image_to_base64(image_path)
+    if st.button("Login"):
+        if username in st.session_state.users and st.session_state.users[username] == password:
+            st.session_state.page = 'upload'  # Navigate to the upload page
+        else:
+            st.error("Invalid credentials. Please try again.")
 
-    st.markdown(
-        f"""
-        <div style="text-align:center;">
-            <img src="data:image/png;base64,{encoded_image}" style="width:450px;">
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-    st.markdown("<h1 style='text-align: center;'>VERTEBRAI</h1>", unsafe_allow_html=True)
-    st.markdown("<h3 style='text-align: center;'>Automated Keypoint Detection for Scoliosis Assessment</h3>", unsafe_allow_html=True)
-
-    if st.button('Get Started', key='get_started', help='Go to sign-up page', use_container_width=True):
-        st.session_state.page = 'signup'  # Navigate to the sign-up page
+    # Sign up prompt below the login form
+    st.markdown("Don't have an account? [Sign Up](#signup)")
 
 # Sign Up page
 elif st.session_state.page == 'signup':
@@ -98,21 +90,9 @@ elif st.session_state.page == 'signup':
             else:
                 st.session_state.users[username] = password  # Save the user's credentials
                 st.success("Sign up successful! Please log in.")
-                st.session_state.page = 'login'  # Navigate to the login page
+                st.session_state.page = 'login'  # Navigate back to login page
         else:
             st.error("Please ensure all fields are filled correctly.")
-
-# Login page
-elif st.session_state.page == 'login':
-    st.subheader("Login")
-    username = st.text_input("Username")
-    password = st.text_input("Password", type="password")
-
-    if st.button("Login"):
-        if username in st.session_state.users and st.session_state.users[username] == password:
-            st.session_state.page = 'upload'  # Navigate to the upload page
-        else:
-            st.error("Invalid credentials. Please try again.")
 
 # Upload page
 elif st.session_state.page == 'upload':
@@ -242,17 +222,16 @@ elif st.session_state.page == 'upload':
                         left: 0;
                         width: 100%;
                         height: 2px;
-                        background-color: non;
+                        background-color: #fff;
                     }
                 </style>
             """, unsafe_allow_html=True)
 
-            # Download button
             st.download_button(
-                label="Download Processed Image", 
-                data=img_io, 
-                file_name="processed_image." + image_format.lower(), 
-                mime="image/" + image_format.lower()
+                label="Download Processed Image (PNG/JPEG)", 
+                data=img_io,
+                file_name="processed_image.png",
+                mime="image/png"
             )
         except Exception as e:
             st.error(f"Error processing the image: {e}")
