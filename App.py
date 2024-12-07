@@ -83,36 +83,33 @@ if st.session_state.page == 'home':
     if st.button('Get Started', key='get_started', help='Go to login page', use_container_width=True):
         st.session_state.page = 'login'  # Navigate to the login page
 
-# Sign-in page
-elif st.session_state.page == 'signin':
-    st.subheader("Sign In")
-    email = st.text_input("Email")
+# Sign-up page
+elif st.session_state.page == 'signup':
+    st.subheader("Sign Up")
+    new_username = st.text_input("Username")
+    new_password = st.text_input("Password", type="password")
     
-    # Simulate sign-in (you can replace this with actual sign-in logic)
-    if st.button("Sign In"):
-        if email:  # Check if email is provided
-            st.session_state.signed_in = True  # Mark user as signed in
-            st.session_state.page = 'login'  # Navigate to the login page
+    if st.button("Sign Up"):
+        if new_username in users_db:
+            st.error("Username already exists. Please choose another one.")
         else:
-            st.error("Please enter a valid email address.")
+            users_db[new_username] = new_password  # Store username and password
+            st.success(f"Account created for {new_username}. Please log in.")
+
+    if st.button("Already have an account? Log in"):
+        st.session_state.page = 'login'  # Navigate to login page
 
 # Login page
 elif st.session_state.page == 'login':
     st.subheader("Login")
-    
-    if not st.session_state.get('signed_in', False):  # Check if the user is signed in
-        st.warning("Please sign in before logging in.")
-        if st.button("Sign In"):
-            st.session_state.page = 'signin'  # Navigate to the sign-in page
-    else:
-        username = st.text_input("Username")
-        password = st.text_input("Password", type="password")
-    
-        if st.button("Login"):
-            if username == "user" and password == "password":
-                st.session_state.page = 'upload'  # Navigate to the upload page
-            else:
-                st.error("Invalid credentials. Please try again.")
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
+
+    if st.button("Login"):
+        if username in users_db and users_db[username] == password:
+            st.session_state.page = 'upload'  # Navigate to the upload page
+        else:
+            st.error("Invalid credentials. Please try again.")
 
 # Upload page
 elif st.session_state.page == 'upload':
