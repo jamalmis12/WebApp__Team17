@@ -52,13 +52,14 @@ def create_dicom_from_image(output_img):
         
         return dicom_io
     except Exception as e:
-        st.error(f"")
+        st.error(f"Error creating DICOM: {e}")
         return None
-
 
 # Initialize session state
 if 'page' not in st.session_state:
     st.session_state.page = 'home'  # Default to the home page
+if 'users' not in st.session_state:
+    st.session_state.users = {}  # Store users' credentials
 
 # Home page
 if st.session_state.page == 'home':
@@ -80,8 +81,26 @@ if st.session_state.page == 'home':
     st.markdown("<h1 style='text-align: center;'>VERTEBRAI</h1>", unsafe_allow_html=True)
     st.markdown("<h3 style='text-align: center;'>Automated Keypoint Detection for Scoliosis Assessment</h3>", unsafe_allow_html=True)
 
-    if st.button('Get Started', key='get_started', help='Go to login page', use_container_width=True):
-        st.session_state.page = 'login'  # Navigate to the login page
+    if st.button('Get Started', key='get_started', help='Go to sign-up page', use_container_width=True):
+        st.session_state.page = 'signup'  # Navigate to the sign-up page
+
+# Sign Up page
+elif st.session_state.page == 'signup':
+    st.subheader("Sign Up")
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
+    confirm_password = st.text_input("Confirm Password", type="password")
+
+    if st.button("Sign Up"):
+        if username and password and password == confirm_password:
+            if username in st.session_state.users:
+                st.error("Username already exists. Please choose another one.")
+            else:
+                st.session_state.users[username] = password  # Save the user's credentials
+                st.success("Sign up successful! Please log in.")
+                st.session_state.page = 'login'  # Navigate to the login page
+        else:
+            st.error("Please ensure all fields are filled correctly.")
 
 # Login page
 elif st.session_state.page == 'login':
@@ -90,7 +109,7 @@ elif st.session_state.page == 'login':
     password = st.text_input("Password", type="password")
 
     if st.button("Login"):
-        if username == "user" and password == "password":
+        if username in st.session_state.users and st.session_state.users[username] == password:
             st.session_state.page = 'upload'  # Navigate to the upload page
         else:
             st.error("Invalid credentials. Please try again.")
