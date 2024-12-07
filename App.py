@@ -86,20 +86,20 @@ if st.session_state.page == 'home':
 # Sign-up page
 elif st.session_state.page == 'signup':
     st.subheader("Sign Up")
-    new_username = st.text_input("Username")
-    new_password = st.text_input("Password", type="password")
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
     confirm_password = st.text_input("Confirm Password", type="password")
 
     if st.button("Sign Up"):
-        if new_username in st.session_state.users:
-            st.error("Username already taken. Please choose a different one.")
-        elif new_password != confirm_password:
-            st.error("Passwords do not match. Please try again.")
+        if username and password and password == confirm_password:
+            if username in user_db:
+                st.error("Username already exists. Please try a different one.")
+            else:
+                user_db[username] = password
+                st.success("Sign-up successful! Please log in.")
+                st.session_state.page = 'login'  # Redirect to the login page
         else:
-            # Store the new user credentials
-            st.session_state.users[new_username] = new_password
-            st.success(f"Sign-up successful! You can now log in with {new_username}.")
-            st.session_state.page = 'login'  # Redirect to login page
+            st.error("Please ensure all fields are filled and passwords match.")
 
 # Login page
 elif st.session_state.page == 'login':
@@ -108,7 +108,7 @@ elif st.session_state.page == 'login':
     password = st.text_input("Password", type="password")
 
     if st.button("Login"):
-        if username in st.session_state.users and st.session_state.users[username] == password:
+        if username in user_db and user_db[username] == password:
             st.session_state.page = 'upload'  # Navigate to the upload page
         else:
             st.error("Invalid credentials. Please try again.")
