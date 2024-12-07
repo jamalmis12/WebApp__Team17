@@ -211,7 +211,7 @@ elif st.session_state.page == 'upload':
                         text-align: center;
                         position: relative;
                         border: none;
-                        background: black;
+                        background: grey;
                         font-size: 16px;
                         color: white;
                     }
@@ -223,7 +223,7 @@ elif st.session_state.page == 'upload':
                         left: 0;
                         width: 100%;
                         height: 2px;
-                        background-color: white;
+                        background-color: non;
                     }
                 </style>
             """, unsafe_allow_html=True)
