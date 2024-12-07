@@ -14,10 +14,7 @@ model = YOLOv5('best.onnx', device='cpu')  # Use 'cuda' if you have a GPU
 
 # Function to calculate the Cobb angle
 def calculate_cobb_angle(points):
-    # Points should be a list of 2 tuples: [(x1, y1), (x2, y2)]
     (x1, y1), (x2, y2) = points
-    
-    # Calculate the slope of the line formed by two vertebrae
     if x1 - x2 != 0:
         slope = (y1 - y2) / (x1 - x2)
         angle = math.degrees(math.atan(abs(slope)))
@@ -31,34 +28,32 @@ def resize_image(image, target_size=(640, 640)):
 # DICOM creation function with force reading enabled
 def create_dicom_from_image(output_img):
     try:
-        # Ensure the DICOM template exists and is valid
         dicom_template_path = './static/template.dcm'
         
-        # Check if template exists
         try:
-            dicom_img = pydicom.dcmread(dicom_template_path, force=True)  # Force reading even if metadata is missing
+            dicom_img = pydicom.dcmread(dicom_template_path, force=True)
         except FileNotFoundError:
             raise Exception(f"Template DICOM file not found at: {dicom_template_path}")
         except Exception as e:
             raise Exception(f"Error reading DICOM template: {e}")
         
-        # Set pixel data for the new DICOM image
         dicom_img.PixelData = np.array(output_img).tobytes()
         
-        # Convert to BytesIO for download
         dicom_io = io.BytesIO()
         dicom_img.save(dicom_io)
-        dicom_io.seek(0)  # Reset file pointer to the start
+        dicom_io.seek(0)
         
         return dicom_io
     except Exception as e:
-        st.error(f"")
+        st.error(f"Error creating DICOM: {e}")
         return None
-
 
 # Initialize session state
 if 'page' not in st.session_state:
     st.session_state.page = 'home'  # Default to the home page
+
+# Create a simple in-memory "database" for user credentials
+user_db = {}
 
 # Home page
 if st.session_state.page == 'home':
@@ -81,7 +76,7 @@ if st.session_state.page == 'home':
     st.markdown("<h3 style='text-align: center;'>Automated Keypoint Detection for Scoliosis Assessment</h3>", unsafe_allow_html=True)
 
     if st.button('Get Started', key='get_started', help='Go to login page', use_container_width=True):
-        st.session_state.page = 'login'  # Navigate to the login page
+        st.session_state.page = 'signup'  # Navigate to the sign-up page
 
 # Sign-up page
 elif st.session_state.page == 'signup':
@@ -112,91 +107,66 @@ elif st.session_state.page == 'login':
             st.session_state.page = 'upload'  # Navigate to the upload page
         else:
             st.error("Invalid credentials. Please try again.")
+
 # Upload page
 elif st.session_state.page == 'upload':
     st.subheader("Upload an X-ray Image")
     file = st.file_uploader("Upload an X-ray image of the spine (JPG, PNG)", type=["jpg", "png"])
 
-    # Handle the image prediction process
     if file is not None:
         try:
-            # Open the image
             img = Image.open(file)
-            
-            # Resize the image to the target size
             img_resized = resize_image(img, target_size=(640, 640))
-            
-            # Convert PIL image to numpy array (BGR for OpenCV)
             img_array = np.array(img_resized)
-            img_array = img_array[..., ::-1]  # Convert RGB to BGR
+            img_array = img_array[..., ::-1]
             
-            # Perform inference with YOLOv5
-            results = model.predict(img_array)  # Make predictions on the image
+            results = model.predict(img_array)
+            output_img = results.render()[0]
+            output_img = np.array(output_img, copy=True)
             
-            # Get the image with bounding boxes drawn
-            output_img = results.render()[0]  # This will draw the boxes on the image
-            output_img = np.array(output_img, copy=True)  # Ensure it's a writable array
-            
-            # Extract the coordinates of the detected vertebrae
-            detections = results.xywh[0].numpy()  # Get the bounding boxes (x, y, width, height, confidence)
+            detections = results.xywh[0].numpy()
             vertebrae_points = []
 
             for detection in detections:
                 x_center, y_center, width, height, confidence, class_id = detection
-                
-                # Check if class_id corresponds to vertebrae (class_id == 0)
                 if int(class_id) == 0:
                     vertebrae_points.append((int(x_center), int(y_center)))
 
-            # Calculate Cobb angle and draw lines if enough vertebrae are detected
             cobb_angle = None
             if len(vertebrae_points) >= 3:
-                # Identify apex vertebra: we assume it's the middle point for simplicity
                 apex_point = vertebrae_points[len(vertebrae_points) // 2]
-                
-                # Identify the upper and lower vertebrae
                 upper_point = vertebrae_points[0]
                 lower_point = vertebrae_points[-1]
                 
-                # Calculate Cobb angle
                 cobb_angle = calculate_cobb_angle([upper_point, lower_point])
                 
-                # Draw lines connecting upper and lower vertebrae
-                cv2.line(output_img, upper_point, lower_point, (255, 0, 255), 2)  # Yellow line for upper-lower connection
-                cv2.circle(output_img, apex_point, 10, (0, 255, 255), -1)  # Blue dot for apex vertebra
-                cv2.circle(output_img, upper_point, 5, (255, 255, 0), -1)  # Green circle for upper vertebra
-                cv2.circle(output_img, lower_point, 5, (0, 0, 255), -1)  # Red circle for lower vertebra
+                cv2.line(output_img, upper_point, lower_point, (255, 0, 255), 2)
+                cv2.circle(output_img, apex_point, 10, (0, 255, 255), -1)
+                cv2.circle(output_img, upper_point, 5, (255, 255, 0), -1)
+                cv2.circle(output_img, lower_point, 5, (0, 0, 255), -1)
 
-                # Annotate the Cobb angle
                 if cobb_angle is not None and cobb_angle != 0:
                     angle_text = f'Cobb Angle: {cobb_angle:.2f}°'
                     text_size = cv2.getTextSize(angle_text, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 2)[0]
                     x_position = output_img.shape[1] - text_size[0] - 15
                     y_position = upper_point[1] - 10
-                    cv2.putText(output_img, angle_text, (x_position, y_position),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+                    cv2.putText(output_img, angle_text, (x_position, y_position), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
                 else:
                     angle_text = "Cobb Angle: Invalid"
                     text_size = cv2.getTextSize(angle_text, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 2)[0]
                     x_position = output_img.shape[1] - text_size[0] - 10
                     y_position = upper_point[1] - 10
-                    cv2.putText(output_img, angle_text, (x_position, y_position),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+                    cv2.putText(output_img, angle_text, (x_position, y_position), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
             else:
                 angle_text = "Not enough vertebrae detected"
                 text_size = cv2.getTextSize(angle_text, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 2)[0]
                 x_position = output_img.shape[1] - text_size[0] - 10
                 y_position = 30
-                cv2.putText(output_img, angle_text, (x_position, y_position),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+                cv2.putText(output_img, angle_text, (x_position, y_position), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
 
-            # Convert the processed image to PIL object
             output_pil = Image.fromarray(output_img)
-            
-            # Display the image with bounding boxes and Cobb angle
             st.image(output_pil, caption="Processed Image with Bounding Boxes and Cobb Angle", use_container_width=True)
 
-            # Provide download button for the processed image in different formats
             img_io = io.BytesIO()
             st.selectbox("Choose image format for download", ["PNG", "JPEG", "JPG", "DICOM"], key="image_format")
             
@@ -218,7 +188,6 @@ elif st.session_state.page == 'upload':
                     )
             
             img_io.seek(0)
-            # Add custom CSS to create a straight line (underline) effect for the label
             st.markdown(""" 
                 <style>
                     .stDownloadButton>button {
@@ -236,7 +205,7 @@ elif st.session_state.page == 'upload':
                     .stDownloadButton>button:before {
                         content: '';
                         position: absolute;
-                        bottom: -4px;  /* Position the line just below the text */
+                        bottom: -4px;  
                         left: 0;
                         width: 100%;
                         height: 2px;
@@ -245,7 +214,6 @@ elif st.session_state.page == 'upload':
                 </style>
             """, unsafe_allow_html=True)
 
-            # Download button
             st.download_button(
                 label="Download Processed Image", 
                 data=img_io, 
