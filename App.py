@@ -57,12 +57,22 @@ def create_dicom_from_image(output_img):
 
 # Initialize session state
 if 'page' not in st.session_state:
-    st.session_state.page = 'login'  # Start on the login page by default
+    st.session_state.page = 'home'  # Start on the Home page by default
 if 'users' not in st.session_state:
     st.session_state.users = {}  # Store users' credentials
 
+# Home page
+if st.session_state.page == 'home':
+    st.title("Welcome to the X-ray Spine Analysis App")
+    st.write("Please choose an option to get started.")
+    
+    if st.button("Login"):
+        st.session_state.page = 'login'  # Navigate to the login page
+    elif st.button("Sign Up"):
+        st.session_state.page = 'signup'  # Navigate to the sign-up page
+
 # Login page
-if st.session_state.page == 'login':
+elif st.session_state.page == 'login':
     st.subheader("Login")
     username = st.text_input("Username")
     password = st.text_input("Password", type="password")
