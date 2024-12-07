@@ -88,14 +88,15 @@ elif st.session_state.page == 'login':
     
     st.markdown("<br>")
 
-    # Centering the "Sign Up" button using HTML
+    # Center the "Don't have an account? Sign Up" button
     st.markdown("""
-        <div style="text-align: center;">
-            <button onclick="window.location.href='/#signup'" style="font-size: 16px; padding: 10px 20px; cursor: pointer;">Don't have an account? Sign Up</button>
-        </div>
+    <div style="display: flex; justify-content: center;">
+        <button style="font-size: 16px; padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;"
+                onclick="window.location.href='/signup';">Don't have an account? Sign Up</button>
+    </div>
     """, unsafe_allow_html=True)
 
-    # Button to navigate to the Sign-Up page
+    # Button to navigate to the Sign-Up page (alternative method, in case you want to keep it)
     if st.button("Don't have an account? Sign Up", help="Redirect to Sign Up page"):
         st.session_state.page = 'signup'  # Navigate to the sign-up page
 
