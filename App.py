@@ -87,10 +87,10 @@ elif st.session_state.page == 'login':
             st.error("Invalid credentials. Please try again.")
 
     # Center the existing "Don't have an account? Sign Up" button using columns
-    col1, col2, col3, col4 = st.columns([1, 1, 2, 1])  # Create 3 columns for centering
+    col1, col2, col3 = st.columns([1, 1, 1])  # Create 3 columns for centering
 
     with col2:  # Place the button in the center column
-        if st.button("Don't have an account? Sign Up", help="Redirect to Sign Up page"):
+        if st.button("Don't have an account? Sign Up", help="Redirect to Sign Up page", use_container_width=450):
             st.session_state.page = 'signup'  # Navigate to the sign-up page
 
 # Sign-up page
