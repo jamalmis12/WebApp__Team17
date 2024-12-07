@@ -223,7 +223,7 @@ elif st.session_state.page == 'upload':
                         left: 0;
                         width: 100%;
                         height: 2px;
-                        background-color: none;
+                        background-color: white;
                     }
                 </style>
             """, unsafe_allow_html=True)
