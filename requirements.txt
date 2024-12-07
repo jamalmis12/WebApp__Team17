@@ -1,5 +1,4 @@
 Flask
-Flask-Cors
 opencv-python-headless
 Pillow
 numpy
