@@ -89,7 +89,7 @@ elif st.session_state.page == 'login':
     st.markdown("<br>", unsafe_allow_html=True)
 
     # Center the existing "Don't have an account? Sign Up" button using columns
-    col1, col2, col3 = st.columns([10, 5, 10])  # Create 3 columns for centering
+    col1, col2, col3 = st.columns([1, 15, 1])  # Create 3 columns for centering
 
     with col2:  # Place the button in the center column
         if st.button("Don't have an account? Sign Up", help="Redirect to Sign Up page"):
