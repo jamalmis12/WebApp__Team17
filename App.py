@@ -237,5 +237,3 @@ elif st.session_state.page == 'upload':
             )
         except Exception as e:
             st.error(f"Error processing the image: {e}")
-
-add here before you can login, sign up first like simple authentication put standard authentication
