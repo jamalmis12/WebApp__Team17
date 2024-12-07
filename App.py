@@ -86,24 +86,14 @@ elif st.session_state.page == 'login':
         else:
             st.error("Invalid credentials. Please try again.")
     
-    st.markdown("<br>")
+    st.markdown("<br>", unsafe_allow_html=True)
 
-    # Center the existing "Don't have an account? Sign Up" button
-    st.markdown("""
-    <style>
-        .center-button {
-            display: flex;
-            justify-content: center;
-            margin-top: 20px;
-        }
-    </style>
-    <div class="center-button">
-    """, unsafe_allow_html=True)
+    # Center the existing "Don't have an account? Sign Up" button using columns
+    col1, col2, col3 = st.columns([1, 3, 1])  # Create 3 columns for centering
 
-    if st.button("Don't have an account? Sign Up", help="Redirect to Sign Up page"):
-        st.session_state.page = 'signup'  # Navigate to the sign-up page
-
-    st.markdown("</div>", unsafe_allow_html=True)
+    with col2:  # Place the button in the center column
+        if st.button("Don't have an account? Sign Up", help="Redirect to Sign Up page"):
+            st.session_state.page = 'signup'  # Navigate to the sign-up page
 
 # Sign-up page
 elif st.session_state.page == 'signup':
