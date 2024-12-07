@@ -14,10 +14,7 @@ model = YOLOv5('best.onnx', device='cpu')  # Use 'cuda' if you have a GPU
 
 # Function to calculate the Cobb angle
 def calculate_cobb_angle(points):
-    # Points should be a list of 2 tuples: [(x1, y1), (x2, y2)]
     (x1, y1), (x2, y2) = points
-    
-    # Calculate the slope of the line formed by two vertebrae
     if x1 - x2 != 0:
         slope = (y1 - y2) / (x1 - x2)
         angle = math.degrees(math.atan(abs(slope)))
@@ -31,24 +28,13 @@ def resize_image(image, target_size=(640, 640)):
 # DICOM creation function with force reading enabled
 def create_dicom_from_image(output_img):
     try:
-        # Ensure the DICOM template exists and is valid
         dicom_template_path = './static/template.dcm'
-        
-        # Check if template exists
-        try:
-            dicom_img = pydicom.dcmread(dicom_template_path, force=True)  # Force reading even if metadata is missing
-        except FileNotFoundError:
-            raise Exception(f"Template DICOM file not found at: {dicom_template_path}")
-        except Exception as e:
-            raise Exception(f"Error reading DICOM template: {e}")
-        
-        # Set pixel data for the new DICOM image
+        dicom_img = pydicom.dcmread(dicom_template_path, force=True)  # Force reading
         dicom_img.PixelData = np.array(output_img).tobytes()
         
-        # Convert to BytesIO for download
         dicom_io = io.BytesIO()
         dicom_img.save(dicom_io)
-        dicom_io.seek(0)  # Reset file pointer to the start
+        dicom_io.seek(0)
         
         return dicom_io
     except Exception as e:
@@ -57,19 +43,32 @@ def create_dicom_from_image(output_img):
 
 # Initialize session state
 if 'page' not in st.session_state:
-    st.session_state.page = 'home'  # Start on the Home page by default
+    st.session_state.page = 'home'  # Default to the home page
 if 'users' not in st.session_state:
     st.session_state.users = {}  # Store users' credentials
 
 # Home page
 if st.session_state.page == 'home':
-    st.title("Welcome to the X-ray Spine Analysis App")
-    st.write("Please choose an option to get started.")
-    
-    if st.button("Login"):
+    def image_to_base64(image_path):
+        with open(image_path, "rb") as img_file:
+            return base64.b64encode(img_file.read()).decode("utf-8")
+
+    image_path = "./static/verr.png"
+    encoded_image = image_to_base64(image_path)
+
+    st.markdown(
+        f"""
+        <div style="text-align:center;">
+            <img src="data:image/png;base64,{encoded_image}" style="width:450px;">
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    st.markdown("<h1 style='text-align: center;'>VERTEBRAI</h1>", unsafe_allow_html=True)
+    st.markdown("<h3 style='text-align: center;'>Automated Keypoint Detection for Scoliosis Assessment</h3>", unsafe_allow_html=True)
+
+    if st.button('Get Started', key='get_started', help='Go to login page', use_container_width=True):
         st.session_state.page = 'login'  # Navigate to the login page
-    elif st.button("Sign Up"):
-        st.session_state.page = 'signup'  # Navigate to the sign-up page
 
 # Login page
 elif st.session_state.page == 'login':
@@ -83,8 +82,10 @@ elif st.session_state.page == 'login':
         else:
             st.error("Invalid credentials. Please try again.")
 
-    # Sign up prompt below the login form
-    st.markdown("Don't have an account? [Sign Up](#signup)")
+    # Sign up prompt
+    if st.markdown("<p style='text-align: center;'>Don't have an account? <a href='#' style='color: blue;'>Sign Up</a></p>", unsafe_allow_html=True):
+        if st.markdown(f"<a href='#' onclick=\"window.location='{st.session_state.page = 'signup'}'\">Sign Up</a>", unsafe_allow_html=True):
+            st.session_state.page = 'signup'
 
 # Sign Up page
 elif st.session_state.page == 'signup':
@@ -100,7 +101,7 @@ elif st.session_state.page == 'signup':
             else:
                 st.session_state.users[username] = password  # Save the user's credentials
                 st.success("Sign up successful! Please log in.")
-                st.session_state.page = 'login'  # Navigate back to login page
+                st.session_state.page = 'login'  # Navigate to the login page
         else:
             st.error("Please ensure all fields are filled correctly.")
 
@@ -109,7 +110,6 @@ elif st.session_state.page == 'upload':
     st.subheader("Upload an X-ray Image")
     file = st.file_uploader("Upload an X-ray image of the spine (JPG, PNG)", type=["jpg", "png"])
 
-    # Handle the image prediction process
     if file is not None:
         try:
             # Open the image
@@ -143,14 +143,9 @@ elif st.session_state.page == 'upload':
             # Calculate Cobb angle and draw lines if enough vertebrae are detected
             cobb_angle = None
             if len(vertebrae_points) >= 3:
-                # Identify apex vertebra: we assume it's the middle point for simplicity
                 apex_point = vertebrae_points[len(vertebrae_points) // 2]
-                
-                # Identify the upper and lower vertebrae
                 upper_point = vertebrae_points[0]
                 lower_point = vertebrae_points[-1]
-                
-                # Calculate Cobb angle
                 cobb_angle = calculate_cobb_angle([upper_point, lower_point])
                 
                 # Draw lines connecting upper and lower vertebrae
@@ -208,40 +203,14 @@ elif st.session_state.page == 'upload':
                         file_name="processed_image.dcm", 
                         mime="application/dicom"
                     )
-            
-            img_io.seek(0)
-            # Add custom CSS to create a straight line (underline) effect for the label
-            st.markdown(""" 
-                <style>
-                    .stDownloadButton>button {
-                        display: block;
-                        margin-left: auto;
-                        margin-right: auto;
-                        text-align: center;
-                        position: relative;
-                        border: none;
-                        background: grey;
-                        font-size: 16px;
-                        color: white;
-                    }
-                    
-                    .stDownloadButton>button:before {
-                        content: '';
-                        position: absolute;
-                        bottom: -4px;  /* Position the line just below the text */
-                        left: 0;
-                        width: 100%;
-                        height: 2px;
-                        background-color: #fff;
-                    }
-                </style>
-            """, unsafe_allow_html=True)
+                img_io.seek(0)
+                st.download_button(
+                    label="Download Processed Image", 
+                    data=img_io, 
+                    file_name="processed_image.png", 
+                    mime="image/png"
+                )
 
-            st.download_button(
-                label="Download Processed Image (PNG/JPEG)", 
-                data=img_io,
-                file_name="processed_image.png",
-                mime="image/png"
-            )
         except Exception as e:
             st.error(f"Error processing the image: {e}")
+
