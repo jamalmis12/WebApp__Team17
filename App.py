@@ -88,16 +88,18 @@ elif st.session_state.page == 'signup':
     st.subheader("Sign Up")
     new_username = st.text_input("Username")
     new_password = st.text_input("Password", type="password")
-    
-    if st.button("Sign Up"):
-        if new_username in users_db:
-            st.error("Username already exists. Please choose another one.")
-        else:
-            users_db[new_username] = new_password  # Store username and password
-            st.success(f"Account created for {new_username}. Please log in.")
+    confirm_password = st.text_input("Confirm Password", type="password")
 
-    if st.button("Already have an account? Log in"):
-        st.session_state.page = 'login'  # Navigate to login page
+    if st.button("Sign Up"):
+        if new_username in st.session_state.users:
+            st.error("Username already taken. Please choose a different one.")
+        elif new_password != confirm_password:
+            st.error("Passwords do not match. Please try again.")
+        else:
+            # Store the new user credentials
+            st.session_state.users[new_username] = new_password
+            st.success(f"Sign-up successful! You can now log in with {new_username}.")
+            st.session_state.page = 'login'  # Redirect to login page
 
 # Login page
 elif st.session_state.page == 'login':
@@ -106,11 +108,10 @@ elif st.session_state.page == 'login':
     password = st.text_input("Password", type="password")
 
     if st.button("Login"):
-        if username in users_db and users_db[username] == password:
+        if username in st.session_state.users and st.session_state.users[username] == password:
             st.session_state.page = 'upload'  # Navigate to the upload page
         else:
             st.error("Invalid credentials. Please try again.")
-
 # Upload page
 elif st.session_state.page == 'upload':
     st.subheader("Upload an X-ray Image")
