@@ -84,26 +84,9 @@ elif st.session_state.page == 'login':
 
     # Sign up prompt
     if st.markdown("<p style='text-align: center;'>Don't have an account? <a href='#' style='color: blue;'>Sign Up</a></p>", unsafe_allow_html=True):
-        if st.markdown(f"<a href='#' onclick=\"window.location='{st.session_state.page = 'signup'}'\">Sign Up</a>", unsafe_allow_html=True):
-            st.session_state.page = 'signup'
+        if st.button("Sign Up", help="Go to the Sign Up page"):
+            st.session_state.page = 'signup'  # Navigate to the signup page
 
-# Sign Up page
-elif st.session_state.page == 'signup':
-    st.subheader("Sign Up")
-    username = st.text_input("Username")
-    password = st.text_input("Password", type="password")
-    confirm_password = st.text_input("Confirm Password", type="password")
-
-    if st.button("Sign Up"):
-        if username and password and password == confirm_password:
-            if username in st.session_state.users:
-                st.error("Username already exists. Please choose another one.")
-            else:
-                st.session_state.users[username] = password  # Save the user's credentials
-                st.success("Sign up successful! Please log in.")
-                st.session_state.page = 'login'  # Navigate to the login page
-        else:
-            st.error("Please ensure all fields are filled correctly.")
 
 # Upload page
 elif st.session_state.page == 'upload':
