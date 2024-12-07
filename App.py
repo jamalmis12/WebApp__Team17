@@ -90,7 +90,7 @@ elif st.session_state.page == 'login':
     col1, col2, col3 = st.columns([1, 1, 1])  # Create 3 columns for centering
 
     with col2:  # Place the button in the center column
-        if st.button("Don't have an account? Sign Up", help="Redirect to Sign Up page", use_container_width=450):
+        if st.button("Don't have an account? Sign Up", help="Redirect to Sign Up page", use_container_width=600):
             st.session_state.page = 'signup'  # Navigate to the sign-up page
 
 # Sign-up page
