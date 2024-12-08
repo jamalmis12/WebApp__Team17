@@ -38,7 +38,7 @@ def create_dicom_from_image(output_img):
         
         return dicom_io
     except Exception as e:
-        st.error(f"Error creating DICOM: {e}")
+        st.error("")
         return None
 
 import streamlit as st
