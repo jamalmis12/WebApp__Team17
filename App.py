@@ -189,13 +189,9 @@ elif st.session_state.page == 'upload':
                 cv2.putText(output_img, angle_text, (x_position, y_position),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
 
-            # Convert the processed image to PIL object
             output_pil = Image.fromarray(output_img)
-            
-            # Display the image with bounding boxes and Cobb angle
             st.image(output_pil, caption="Processed Image with Bounding Boxes and Cobb Angle", use_container_width=True)
 
-            # Provide download button for the processed image in different formats
             img_io = io.BytesIO()
             st.selectbox("Choose image format for download", ["PNG", "JPEG", "JPG", "DICOM"], key="image_format")
             
@@ -215,14 +211,40 @@ elif st.session_state.page == 'upload':
                         file_name="processed_image.dcm", 
                         mime="application/dicom"
                     )
-                img_io.seek(0)
-                st.download_button(
-                    label="Download Processed Image", 
-                    data=img_io, 
-                    file_name="processed_image.png", 
-                    mime="image/png"
-                )
+            
+            img_io.seek(0)
+            st.markdown(""" 
+                <style>
+                    .stDownloadButton>button {
+                        display: block;
+                        margin-left: auto;
+                        margin-right: auto;
+                        text-align: center;
+                        position: relative;
+                        border: none;
+                        background: grey;
+                        font-size: 16px;
+                        color: white;
+                    }
+                    
+                    .stDownloadButton>button:before {
+                        content: '';
+                        position: absolute;
+                        bottom: -4px;  
+                        left: 0;
+                        width: 100%;
+                        height: 2px;
+                        background-color: non;
+                    }
+                </style>
+            """, unsafe_allow_html=True)
 
+            st.download_button(
+                label="Download Processed Image", 
+                data=img_io, 
+                file_name="processed_image." + image_format.lower(), 
+                mime="image/" + image_format.lower()
+            )
         except Exception as e:
             st.error(f"Error processing the image: {e}")
 
