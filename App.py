@@ -131,7 +131,7 @@ elif st.session_state.page == 'upload':
             img_resized = resize_image(img, target_size=(640, 640))
             
             # Convert PIL image to numpy array (BGR for OpenCV)
-            img_array = np.array(img_resized)
+            img_array = np.array(img)
             img_array = img_array[..., ::-1]  # Convert RGB to BGR
             
             # Perform inference with YOLOv5
