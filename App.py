@@ -8,12 +8,9 @@ import cv2
 from yolov5 import YOLOv5  # Import YOLOv5
 import base64  # Import base64 module
 import pydicom  # For DICOM support
-import os
 
-# Use the absolute path to the model
-model_path = os.path.join(os.getcwd(), 'best.pt')
-model = YOLOv5(model_path, device='cpu')  # Use 'cuda' if you have a GPU
-
+# Load the YOLOv5 model (adjust path to your actual best.onnx file)
+model = YOLOv5('best.onnx', device='cpu')  # Use 'cuda' if you have a GPU
 
 # Function to calculate the Cobb angle
 def calculate_cobb_angle(points):
@@ -23,6 +20,10 @@ def calculate_cobb_angle(points):
         angle = math.degrees(math.atan(abs(slope)))
         return angle
     return 0  # In case the line is vertical (undefined slope)
+
+# Function to resize image
+def resize_image(image, target_size=(640, 640)):
+    return image.resize(target_size, Image.Resampling.LANCZOS)
 
 # DICOM creation function with force reading enabled
 def create_dicom_from_image(output_img):
@@ -39,6 +40,10 @@ def create_dicom_from_image(output_img):
     except Exception as e:
         st.error(f"Error creating DICOM: {e}")
         return None
+
+import streamlit as st
+import base64
+from PIL import Image
 
 # Initialize session state
 if 'page' not in st.session_state:
@@ -103,6 +108,8 @@ elif st.session_state.page == 'signup':
                 st.session_state.users[username] = password  # Save the user's credentials
                 st.success("Sign-up successful! Please log in.")
                 st.session_state.page = 'login'  # Navigate to the login page
+        else:
+            st.error("Please ensure all fields are filled correctly.")
     
 # Upload page (after successful login)
 elif st.session_state.page == 'upload':
@@ -114,10 +121,14 @@ elif st.session_state.page == 'upload':
         # Add image processing logic
         st.image(file, caption="Uploaded Image", use_container_width=True)
 
+
     if file is not None:
         try:
             # Open the image
             img = Image.open(file)
+            
+            # Resize the image to the target size
+            img_resized = resize_image(img, target_size=(640, 640))
             
             # Convert PIL image to numpy array (BGR for OpenCV)
             img_array = np.array(img_resized)
@@ -214,3 +225,4 @@ elif st.session_state.page == 'upload':
 
         except Exception as e:
             st.error(f"Error processing the image: {e}")
+
