@@ -201,6 +201,10 @@ elif st.session_state.page == 'upload':
 
             image_format = st.session_state.get('image_format', 'PNG')
             
+
+    
+
+            # Create the image output (assuming output_pil is already defined)
             if image_format == "PNG":
                 output_pil.save(img_io, 'PNG')
             elif image_format == "JPG" or image_format == "JPEG":
@@ -209,19 +213,24 @@ elif st.session_state.page == 'upload':
                 dicom_io = create_dicom_from_image(output_img)
                 
                 if dicom_io:
+                    # Download button for DICOM file
                     st.download_button(
                         label="Download Processed Image (DICOM)", 
                         data=dicom_io, 
                         file_name="processed_image.dcm", 
                         mime="application/dicom"
                     )
-                img_io.seek(0)
-                st.download_button(
-                    label="Download Processed Image", 
-                    data=img_io, 
-                    file_name="processed_image.png", 
-                    mime="image/png"
-                )
-
+        
+                # For other formats (PNG/JPEG)
+                else:
+                    img_io.seek(0)  # Reset the pointer for the other image formats
+                    st.download_button(
+                        label="Download Processed Image", 
+                        data=img_io, 
+                        file_name=f"processed_image.{image_format.lower()}", 
+                        mime=f"image/{image_format.lower()}"
+                    )
+        
         except Exception as e:
             st.error(f"Error processing the image: {e}")
+
