@@ -200,28 +200,14 @@ elif st.session_state.page == 'upload':
             st.selectbox("Choose image format for download", ["PNG", "JPEG", "JPG", "DICOM"], key="image_format")
 
             image_format = st.session_state.get('image_format', 'PNG')
-
+            
             if image_format == "PNG":
                 output_pil.save(img_io, 'PNG')
-                img_io.seek(0)
-                st.download_button(
-                    label="Download Processed Image (PNG)", 
-                    data=img_io, 
-                    file_name="processed_image.png", 
-                    mime="image/png"
-                )
             elif image_format == "JPG" or image_format == "JPEG":
                 output_pil.save(img_io, 'JPEG')
-                img_io.seek(0)
-                st.download_button(
-                    label="Download Processed Image (JPG)", 
-                    data=img_io, 
-                    file_name="processed_image.jpg", 
-                    mime="image/jpeg"
-                )
             elif image_format == "DICOM":
                 dicom_io = create_dicom_from_image(output_img)
-            
+                
                 if dicom_io:
                     st.download_button(
                         label="Download Processed Image (DICOM)", 
@@ -229,28 +215,13 @@ elif st.session_state.page == 'upload':
                         file_name="processed_image.dcm", 
                         mime="application/dicom"
                     )
-            
-            # Additional download buttons for other image formats
-            img_io.seek(0)
-            st.download_button(
-                label="Download Processed Image (PNG)", 
-                data=img_io, 
-                file_name="processed_image.png", 
-                mime="image/png"
-            )
-            
-            img_io.seek(0)
-            st.download_button(
-                label="Download Processed Image (JPG)", 
-                data=img_io, 
-                file_name="processed_image.jpg", 
-                mime="image/jpeg"
-            )
-            
-            img_io.seek(0)
-            st.download_button(
-                label="Download Processed Image (JPEG)", 
-                data=img_io, 
-                file_name="processed_image.jpeg", 
-                mime="image/jpeg"
-            )
+                img_io.seek(0)
+                st.download_button(
+                    label="Download Processed Image", 
+                    data=img_io, 
+                    file_name="processed_image.png", 
+                    mime="image/png"
+                )
+
+        except Exception as e:
+            st.error(f"Error processing the image: {e}")
