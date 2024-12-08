@@ -191,23 +191,23 @@ elif st.session_state.page == 'upload':
 
             # Convert the processed image to PIL object
             output_pil = Image.fromarray(output_img)
-            
+
             # Display the image with bounding boxes and Cobb angle
             st.image(output_pil, caption="Processed Image with Bounding Boxes and Cobb Angle", use_container_width=True)
 
             # Provide download button for the processed image in different formats
             img_io = io.BytesIO()
             st.selectbox("Choose image format for download", ["PNG", "JPEG", "JPG", "DICOM"], key="image_format")
-            
+
             image_format = st.session_state.get('image_format', 'PNG')
-            
+
             if image_format == "PNG":
                 output_pil.save(img_io, 'PNG')
             elif image_format == "JPG" or image_format == "JPEG":
                 output_pil.save(img_io, 'JPEG')
             elif image_format == "DICOM":
                 dicom_io = create_dicom_from_image(output_img)
-                
+
                 if dicom_io:
                     st.download_button(
                         label="Download Processed Image (DICOM)", 
@@ -225,4 +225,3 @@ elif st.session_state.page == 'upload':
 
         except Exception as e:
             st.error(f"Error processing the image: {e}")
-
