@@ -10,7 +10,7 @@ import base64  # Import base64 module
 import pydicom  # For DICOM support
 
 # Load the YOLOv5 model (adjust path to your actual best.onnx file)
-model = YOLOv5('best.onnx', device='cpu')  # Use 'cuda' if you have a GPU
+model = YOLOv5('best.pt', device='cpu')  # Use 'cuda' if you have a GPU
 
 # Function to calculate the Cobb angle
 def calculate_cobb_angle(points):
