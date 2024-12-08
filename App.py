@@ -254,3 +254,5 @@ elif st.session_state.page == 'upload':
                 file_name="processed_image.jpeg", 
                 mime="image/jpeg"
             )
+
+)
